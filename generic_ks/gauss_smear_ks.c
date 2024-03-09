@@ -26,14 +26,12 @@ malloc_kg_temps(){
       printf("node %d can't malloc wtmp[%d]\n",this_node,dir);
       terminate(1);
     }
-    memset(wtmp[dir],'\0',sites_on_node*sizeof(su3_vector));
     
     wtmp[OPP_DIR(dir)] =(su3_vector *)malloc(sites_on_node*sizeof(su3_vector));
     if(wtmp[OPP_DIR(dir)] == NULL){
       printf("node %d can't malloc wtmp[%d]\n",this_node,OPP_DIR(dir));
       terminate(1);
     }
-    memset(wtmp[OPP_DIR(dir)],'\0',sites_on_node*sizeof(su3_vector));
   }
 }
 
@@ -75,13 +73,13 @@ forward2(int dir, su3_vector *dest, su3_vector *src,
 			tmp + i ); 
     } END_LOOP_OMP;
   } else {
-    FORALLSITES(i,s){
+    FORALLSITES_OMP(i,s,){
       if(s->t == t0){
 	mult_su3_mat_vec( t_links + 4*i + dir,  
 			  (su3_vector * )(gen_pt[dir][i]), 
 			  tmp + i ); 
       }
-    }
+    } END_LOOP_OMP;
   }
 
   cleanup_gather(tag);
@@ -99,13 +97,13 @@ forward2(int dir, su3_vector *dest, su3_vector *src,
 			dest + i ); 
     } END_LOOP_OMP;
   } else {
-    FORALLSITES(i,s){
+    FORALLSITES_OMP(i,s,){
       if(s->t == t0){
 	mult_su3_mat_vec( t_links + 4*i + dir,  
 			  (su3_vector * )(gen_pt[dir][i]), 
 			  dest + i ); 
       }
-    }
+    } END_LOOP_OMP;
   }
 
   cleanup_gather(tag);
@@ -135,13 +133,13 @@ backward2(int dir, su3_vector *dest, su3_vector *src,
 			    dest + i );
     } END_LOOP_OMP;
   } else {
-    FORALLSITES(i,s){
+    FORALLSITES_OMP(i,s,){
       /* Work only on the specified time slice(s) */
       if(s->t == t0){
 	mult_adj_su3_mat_vec( t_links +  4*i + dir, src + i, 
 			      dest + i );
       }
-    }
+    } END_LOOP_OMP;
   }
   
   /* gen_pt_array <- shift(down,dir)(dest) */
@@ -158,13 +156,13 @@ backward2(int dir, su3_vector *dest, su3_vector *src,
 			    tmp + i ); 
     } END_LOOP_OMP;
   } else {
-    FORALLSITES(i,s){
+    FORALLSITES_OMP(i,s,){
       if(s->t == t0){
 	mult_adj_su3_mat_vec( t_links + 4*i + dir,  
 			      (su3_vector * )(gen_pt[OPP_DIR(dir)][i]), 
 			      tmp + i ); 
       }
-    }
+    } END_LOOP_OMP;
   }
   
   cleanup_gather(tag);
@@ -182,11 +180,11 @@ backward2(int dir, su3_vector *dest, su3_vector *src,
       su3vec_copy( (su3_vector *)gen_pt[OPP_DIR(dir)][i], dest + i);
     } END_LOOP_OMP;
   } else {
-    FORALLSITES(i,s){
+    FORALLSITES_OMP(i,s,){
       if(s->t == t0){
 	su3vec_copy( (su3_vector *)gen_pt[OPP_DIR(dir)][i], dest + i);
       }
-    }
+    } END_LOOP_OMP;
   }
 
   cleanup_gather(tag);
@@ -216,10 +214,10 @@ klein_gord_field(su3_vector *psi, su3_vector *chi,
       scalar_mult_su3_vector(psi + i, ftmp, chi + i);
     } END_LOOP_OMP;
   } else {
-    FORALLSITES(i,s){
+    FORALLSITES_OMP(i,s,){
       if(s->t == t0)
 	scalar_mult_su3_vector(psi + i, ftmp, chi + i);
-    }
+    } END_LOOP_OMP;
   }
 
   /* do 2-link parallel transport of psi in all dirs */
@@ -240,7 +238,7 @@ klein_gord_field(su3_vector *psi, su3_vector *chi,
       sub_su3_vector( chi + i, wtmp[ZDOWN] + i, chi + i);
     } END_LOOP_OMP;
   } else {
-    FORALLSITES(i,s){
+    FORALLSITES_OMP(i,s,){
       if(t0 == ALL_T_SLICES || s->t == t0){
 	sub_su3_vector( chi + i, wtmp[XUP] + i, chi + i);
 	sub_su3_vector( chi + i, wtmp[YUP] + i, chi + i);
@@ -249,7 +247,7 @@ klein_gord_field(su3_vector *psi, su3_vector *chi,
 	sub_su3_vector( chi + i, wtmp[YDOWN] + i, chi + i);
 	sub_su3_vector( chi + i, wtmp[ZDOWN] + i, chi + i);
       }
-    }
+    } END_LOOP_OMP;
   }
 
   cleanup_kg_temps();
@@ -293,11 +291,11 @@ gauss_smear_v_field_cpu(su3_vector *src, su3_matrix *t_links,
 	  scalar_mult_su3_vector(src+i, ftmp, tmp+i);
 	} END_LOOP_OMP;
       } else {
-	FORALLSITES(i,s){
+	FORALLSITES_OMP(i,s,){
 	  /* tmp = src * ftmp; */
 	  if(s->t == t0)
 	    scalar_mult_su3_vector(src+i, ftmp, tmp+i);
-	}
+	} END_LOOP_OMP;
       }
       klein_gord_field(tmp, src, t_links, ftmpinv, t0);
     }
