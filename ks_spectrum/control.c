@@ -970,18 +970,19 @@ int main(int argc, char *argv[])
     destroy_ape_links_3D(ape_links);
     
 
-    /* Destroy fermion links (created in readin() */
-    
-#if FERM_ACTION == HISQ
-    destroy_fermion_links_hisq(fn_links);
-#elif FERM_ACTION == HYPISQ
-    destroy_fermion_links_hypisq(fn_links);
-#else
-    destroy_fermion_links(fn_links);
-#endif
-    fn_links = NULL;
-    starttime = endtime;
   } /* readin(prompt) */
+
+  /* Destroy fermion links (created in readin() */
+  
+#if FERM_ACTION == HISQ
+  destroy_fermion_links_hisq(fn_links);
+#elif FERM_ACTION == HYPISQ
+  destroy_fermion_links_hypisq(fn_links);
+#else
+  destroy_fermion_links(fn_links);
+#endif
+  fn_links = NULL;
+  starttime = endtime;
   
   free_lattice();
 
