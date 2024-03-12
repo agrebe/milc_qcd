@@ -306,11 +306,14 @@ void populate_qk_oct_point_split(ks_prop_field **qko,int qknum,int r0[],su3_matr
       }
     }
     if (oldIdx != -1) {
+      // use another source as starting point
       int tempN = 1;
       int tempDir [3] = {dir[skIdx][n[skIdx]-1], 0, 0};
       apply_par_xport_3pt(kspc[skIdx],kspc[oldIdx],tempN,tempDir,r0,0x0,links);
     } else {
-      apply_par_xport_3pt(kspc[skIdx],qko[scIdx],n[skIdx],dir[skIdx],r0,0x0,links);
+      // use original field as starting point
+      // here we need all the sites since something else will use this as starting point
+      apply_par_xport_3pt(kspc[skIdx],qko[scIdx],n[skIdx],dir[skIdx],r0,0x1,links);
     }
 
 #ifdef DO_MSYNC
