@@ -979,21 +979,15 @@ gb_sink_term_loop(ks_prop_field **qk0, ks_prop_field **qk1, ks_prop_field **qk2,
     for(j=0;j<nterm;j++){
       if(pf[j] == 0) { continue; } // don't compute trivial terms
       triplet_to_singlet_index(tskIdx[j],dflt);
-      for(k=0;k<nperm;k++){
-        gb_get_permutation_order(snk_op,k,num_d,num_s,dflt,perm); // permute tastes
-        psign = gb_get_permutation_sign(snk_op,k,num_d,num_s);
-        gb_mixed_sink_term(qk0, qk1, qk2, links, tscIdx, singlet_to_triplet_index(perm),
-          r0, stIdx, dowall, docube, domom, mom, flip_snk, pfi*(Real)pf[j]*psign/sqrt(nperm*pfsum), dt);
-
-        /* Need to also tieup the other way around */
-        int temp_perm[3];
-        temp_perm[0] = perm[1];
-        temp_perm[1] = perm[0];
-        temp_perm[2] = perm[2];
-        gb_mixed_sink_term(qk0, qk1, qk2, links, tscIdx, singlet_to_triplet_index(temp_perm),
-          r0, stIdx, dowall, docube, domom, mom, flip_snk, pfi*(Real)pf[j]*psign/sqrt(nperm*pfsum), dt);
-
-      }
+      // for the specific mixed term we are dealing with,
+      // we only need to include the first permutation (identity)
+      // provided we also remove the (01) permutation that was
+      // hardcoded here in the original code
+      k=0; // corresponds to identity permutation
+      gb_get_permutation_order(snk_op,k,num_d,num_s,dflt,perm); // permute tastes
+      psign = gb_get_permutation_sign(snk_op,k,num_d,num_s);
+      gb_mixed_sink_term(qk0, qk1, qk2, links, tscIdx, singlet_to_triplet_index(perm),
+        r0, stIdx, dowall, docube, domom, mom, flip_snk, pfi*(Real)pf[j]*psign/sqrt(nperm*pfsum), dt);
     }
   }
   else{
