@@ -585,8 +585,9 @@ accum_baryon_color_asym(ks_prop_field *qk0, ks_prop_field *qk1, ks_prop_field *q
     if (initialized==false) {
       int volume = (nx * ny * nz * nt);
       // parallelize over cube corners
+      // Note: For corner sinks, we only need orig = 0 case
       #pragma omp parallel for
-      for(int temp_corner=0; temp_corner<8; temp_corner++){
+      for(int temp_corner=0; temp_corner<1; temp_corner++){
           // malloc the memory (so we don't need size ahead of time)
           // Note: This is never free'd, so this is technically a memory leak
           // But if initialization is only called once, we only allocate once
