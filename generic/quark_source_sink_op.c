@@ -1856,7 +1856,6 @@ void wv_field_op(wilson_vector *src, quark_source_sink_op *qss_op,
 void ksp_sink_op(quark_source_sink_op *qss_op, ks_prop_field *ksp )
 {
   int color;
-  su3_vector *v = create_v_field();
 
   /* Initilize source files if saving as source */
   if (qss_op->type  == SAVE_VECTOR_SRC) {
@@ -1873,15 +1872,12 @@ void ksp_sink_op(quark_source_sink_op *qss_op, ks_prop_field *ksp )
       /* Important to keep track of internal color counter */
       qss_op->qs_save.color = color; 
     }
-      copy_v_from_ksp(v, ksp, color);
-      v_field_op(v, qss_op, FULL, ALL_T_SLICES);
-      insert_ksp_from_v(ksp, v, color);
+      v_field_op(ksp->v[color], qss_op, FULL, ALL_T_SLICES);
   }
   
   if (qss_op->type  == SAVE_VECTOR_SRC) {
     if(qss_op->qs_save.saveflag != FORGET) w_source_close(&qss_op->qs_save);
   }
-  destroy_v_field(v);
 } /* ksp_sink_op */
 
 #endif
