@@ -66,10 +66,11 @@
 #include <qmp.h>
 #endif
 
-static int squaresize[4];	   /* local dimensions (number of
+// expose the first two variables for external use
+int squaresize[4];	   /* local dimensions (number of
 				      sites) of the sublattice on one
 				      node (hypercube) */
-static int nsquares[4];	           /* number of site hypercubes in each direction, one hypercube per
+int nsquares[4];	           /* number of site hypercubes in each direction, one hypercube per
 				      node */
 static int machine_coordinates[4]; /* logical machine (MPI PE rank) coordinates for this MPI rank */ 
 

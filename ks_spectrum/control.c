@@ -969,7 +969,7 @@ int main(int argc, char *argv[])
     
     destroy_ape_links_3D(ape_links);
     
-
+    starttime = endtime;
   } /* readin(prompt) */
 
   /* Destroy fermion links (created in readin() */
@@ -982,7 +982,6 @@ int main(int argc, char *argv[])
   destroy_fermion_links(fn_links);
 #endif
   fn_links = NULL;
-  starttime = endtime;
   
   free_lattice();
 

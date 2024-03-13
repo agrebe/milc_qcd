@@ -56,6 +56,8 @@
 //static int      num_int_buff = 0; // integer to specify number of buffers
 //#endif
 
+extern int squaresize [4];
+
 #ifdef GB_BARYON
 /*------------------------------------------------------------------*/
 static void conj_v_field(su3_vector *dest,su3_vector *src){
@@ -111,19 +113,37 @@ sym_shift_3pt(int dir, short doBW, su3_vector *dest, su3_vector *src, su3_matrix
   #endif // ONE_SIDED_SHIFT_GB
 
   site * s;
-  FORALLSITES_OMP(i,s,) {
-    // only compute on sites that are at cube origin
-    // if (!(doBW) && ((s->x % 2) || (s->y % 2) || (s->z % 2))) continue;
-    #ifdef NO_SINK_LINKS 
-      su3vec_copy( (su3_vector *)gen_pt[0][i], dest+i); 
-    #else
-      mult_su3_mat_vec( links+4*i+dir, (su3_vector*)gen_pt[0][i], dest+i );
-    #endif // NO_SINK_LINKS
-    #ifndef ONE_SIDED_SHIFT_GB
-      add_su3_vector(dest+i, (su3_vector*)gen_pt[1][i], dest+i ); 
-      scalar_mult_su3_vector( dest+i, .5, dest+i ); 
-    #endif // ONE_SIDED_SHIFT_GB
-  } END_LOOP_OMP
+  // stride in each direction
+  // x is always done first, so its stride is 2
+  int xstride = 2, ystride = 1, zstride = 1;
+  if (!(doBW)) {
+    ystride = 2;
+    zstride = 2;
+  } else if (dir == YUP) {
+    ystride = 2;
+  } else if (dir == ZUP) {
+    zstride = 2;
+  }
+  // only compute on sites that are at cube origin
+  #pragma omp parallel for collapse(2)
+  for (int t = 0; t < squaresize[TUP]; t ++) {
+    for (int z = 0; z < squaresize[ZUP]; z += zstride) {
+      for (int y = 0; y < squaresize[YUP]; y += ystride) {
+        for (int x = 0; x < squaresize[XUP]; x += xstride) {
+          int i = node_index(x,y,z,t);
+          #ifdef NO_SINK_LINKS 
+            su3vec_copy( (su3_vector *)gen_pt[0][i], dest+i); 
+          #else
+            mult_su3_mat_vec( links+4*i+dir, (su3_vector*)gen_pt[0][i], dest+i );
+          #endif // NO_SINK_LINKS
+          #ifndef ONE_SIDED_SHIFT_GB
+            add_su3_vector(dest+i, (su3_vector*)gen_pt[1][i], dest+i ); 
+            scalar_mult_su3_vector( dest+i, .5, dest+i ); 
+          #endif // ONE_SIDED_SHIFT_GB
+        }
+      }
+    }
+  }
 
   cleanup_gather(tag[0]);
   #ifndef ONE_SIDED_SHIFT_GB
