@@ -113,7 +113,7 @@ sym_shift_3pt(int dir, short doBW, su3_vector *dest, su3_vector *src, su3_matrix
   site * s;
   FORALLSITES_OMP(i,s,) {
     // only compute on sites that are at cube origin
-    if (!(doBW) && ((s->x % 2) || (s->y % 2) || (s->z % 2))) continue;
+    // if (!(doBW) && ((s->x % 2) || (s->y % 2) || (s->z % 2))) continue;
     #ifdef NO_SINK_LINKS 
       su3vec_copy( (su3_vector *)gen_pt[0][i], dest+i); 
     #else
