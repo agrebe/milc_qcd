@@ -317,6 +317,7 @@ void copy_ksp_field(ks_prop_field *kspcopy, ks_prop_field *ksp){
   int color;
 
   kspcopy->nc = ksp->nc;
+  #pragma omp parallel for
   for(color = 0; color < ksp->nc; color++){
     copy_v_field(kspcopy->v[color], ksp->v[color]);
   }
