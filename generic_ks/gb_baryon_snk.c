@@ -505,7 +505,6 @@ accum_baryon_color_asym(ks_prop_field *qk0, ks_prop_field *qk1, ks_prop_field *q
   //complex testsum;
   Real pf = pfi/36.;
   complex csum_new[nt] __attribute__((aligned (64))); // 64-byte
-  #pragma omp simd aligned(csum_new:64)
   for(int t=0;t<nt;t++){
     (csum_new[t]).real = 0.;
     (csum_new[t]).imag = 0.;
@@ -611,7 +610,6 @@ accum_baryon_color_asym(ks_prop_field *qk0, ks_prop_field *qk1, ks_prop_field *q
     #pragma omp parallel
       {
 	complex th_csum_new[nt] __attribute__((aligned (64))); // thread private space
-        #pragma omp simd aligned(th_csum_new:64)
 	for(int t=0; t<nt; t++){ // zero
 	  th_csum_new[t].real = 0.;
 	  th_csum_new[t].imag = 0.;
@@ -629,12 +627,10 @@ accum_baryon_color_asym(ks_prop_field *qk0, ks_prop_field *qk1, ks_prop_field *q
 	} // END OMP FOR
 	#pragma omp critical
 	{
-          #pragma omp simd aligned(csum_new,th_csum_new:64)
 	  for(int t=0; t<nt; t++) CSUM(csum_new[t],th_csum_new[t]); // accumulate
 	}
       } // END OMP PARALLEL
 
-    #pragma omp simd aligned(csum_new:64)
     for(int t=0;t<nt;t++){
       CMULREAL(csum_new[t],pf,csum_new[t]);
       CSUM(dt[t],csum_new[t]);
