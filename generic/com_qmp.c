@@ -1116,6 +1116,7 @@ sort_site_list(
   int *args,	        /* arguments to pass to function */
   int forw_back)	/* look forwards or backwards in map */
 {
+  double start = dclock();
   register int j,k,in1,in2,flag;
   register site *s;
   int x,y,z,t;
@@ -1135,7 +1136,7 @@ sort_site_list(
     key[j] = node_index(x,y,z,t);
   }
 
-#if 0
+#if 1
 
   /* bubble sort, if this takes too long fix it later */
   for(j = n-1; j>0; j--) {
@@ -1159,6 +1160,8 @@ sort_site_list(
 #endif
 
   free(key);
+  double end = dclock();
+  printf("Time for sort_site_list with n = %d: %f sec\n", n, end-start);
 }
 
 /*
