@@ -1363,7 +1363,7 @@ static FILE* open_fnal_gb_baryon_file(int triplet){
 
 /*--------------------------------------------------------------------*/
 void spectrum_ks_gb_baryon_cleanup(int triplet){
-  int num_corr = param.num_corr_b[triplet];
+  int num_corr = param.num_corr_gb[triplet];
 
   if(param.do_gbbaryon_spect[triplet])
     destroy_hadron_prop(&gb_baryon_prop, num_corr);
